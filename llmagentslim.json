@@ -1,0 +1,15 @@
+{
+  "LLMAgentSlim": {
+    "Provider": "ollama",
+    "Providers": {
+      "Ollama": {
+        "Endpoint": "http://localhost:11434/",
+        "Model": "qwen3-coder:30b",
+        "TimeoutMinutes": 10,
+        "TopK": 10,
+        "TopP": 0.5,
+        "Temperature": 0.1
+      }
+    }
+  }
+}
