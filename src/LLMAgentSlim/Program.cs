@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Ollama;
@@ -48,12 +49,17 @@ systemPrompt = systemPrompt
 	.Replace("PROJECT_OS", Environment.OSVersion.ToString());
 
 var builder = Kernel.CreateBuilder();
+builder.Services.AddSingleton<IFunctionInvocationFilter, ConsoleFunctionInvocationFilter>();
 PromptExecutionSettings settings;
 HttpClient? configuredHttpClient = null;
 
 switch (agentConfiguration.Provider.Trim().ToLowerInvariant())
 {
 	case "ollama":
+		Console.WriteLine("Using Ollama as the provider.");
+		Console.WriteLine($"Endpoint: {agentConfiguration.Providers.Ollama.Endpoint}");
+		Console.WriteLine($"Model: {agentConfiguration.Providers.Ollama.Model}");
+
 		configuredHttpClient = new HttpClient
 		{
 			BaseAddress = new Uri(agentConfiguration.Providers.Ollama.Endpoint),
@@ -78,7 +84,9 @@ switch (agentConfiguration.Provider.Trim().ToLowerInvariant())
 }
 
 using var httpClient = configuredHttpClient;
+var cancellationTokenSource = new CancellationTokenSource();
 
+builder.Plugins.AddFromObject(new FinishPlugin(() => cancellationTokenSource));
 builder.Plugins.AddFromObject(new NotesPlugin(currentDir));
 builder.Plugins.AddFromObject(new CSharpPlugin());
 builder.Plugins.AddFromObject(new FileSystemPlugin(currentDir));
@@ -91,13 +99,23 @@ builder.Plugins.AddFromObject(new DotNetPlugin(currentDir));
 ChatHistory history = [];
 history.AddSystemMessage(systemPrompt);
 
-Console.WriteLine("Instruction:");
-Console.WriteLine(">>> ");
+Console.WriteLine("Directory: " + currentDir);
+Console.WriteLine();
+
+Console.WriteLine("Instruction or 'exit' to quit:");
+Console.Write(">>> ");
 var instruction = Console.ReadLine();
 while (string.IsNullOrWhiteSpace(instruction))
 {
 	Console.WriteLine("Instruction cannot be empty. Please enter a valid instruction:");
+	Console.Write(">>> ");
 	instruction = Console.ReadLine();
+}
+
+if (instruction.Trim().ToLowerInvariant() == "exit")
+{
+	Console.WriteLine("Exiting...");
+	return;
 }
 
 history.AddUserMessage(instruction);
@@ -105,36 +123,44 @@ history.AddUserMessage(instruction);
 var kernel = builder.Build();
 var chat = kernel.GetRequiredService<IChatCompletionService>();
 
-for (int step = 1; ; step++)
+while (true)
 {
-	Console.WriteLine($"--- STEP {step} ---");
-
-	var response = await chat.GetChatMessageContentAsync(
-		history,
-		settings,
-		kernel
-	).ConfigureAwait(false);
-
-	history.Add(response);
-
-	Console.WriteLine(response.Content);
-
-	if (response.Content?.Contains("TASK_COMPLETED") == true
-		|| response.Content?.Contains("I cannot continue") == true
-		|| string.IsNullOrWhiteSpace(response.Content))
+	try
 	{
-		Console.WriteLine(">>> ");
-		var feedback = Console.ReadLine();
+		var response = await chat.GetChatMessageContentAsync(
+			history,
+			settings,
+			kernel,
+			cancellationTokenSource.Token
+		).ConfigureAwait(false);
 
-		while (string.IsNullOrWhiteSpace(feedback))
-		{
-			Console.WriteLine("Instruction cannot be empty. Please enter a valid instruction:");
-			Console.WriteLine(">>> ");
-			feedback = Console.ReadLine();
-		}
+		history.Add(response);
 
-		history.AddUserMessage(feedback);
+		Console.WriteLine(response.Content);
 	}
+	catch (TaskCanceledException)
+	{
+		cancellationTokenSource = new CancellationTokenSource();
+	}
+
+	Console.WriteLine("Instruction or 'exit' to quit:");
+	Console.Write(">>> ");
+	var feedback = Console.ReadLine();
+
+	while (string.IsNullOrWhiteSpace(feedback))
+	{
+		Console.WriteLine("Instruction cannot be empty. Please enter a valid instruction:");
+		Console.Write(">>> ");
+		feedback = Console.ReadLine();
+	}
+
+	if (feedback.Trim().ToLowerInvariant() == "exit")
+	{
+		Console.WriteLine("Exiting...");
+		return;
+	}
+
+	history.AddUserMessage(feedback);
 }
 
 static string ResolveWorkingDirectory(string? requestedWorkingDirectory)
