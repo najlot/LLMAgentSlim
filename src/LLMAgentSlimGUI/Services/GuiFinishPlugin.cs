@@ -1,15 +1,16 @@
-﻿using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel;
+using System;
 using System.ComponentModel;
+using System.Threading;
 
-namespace LLMAgentSlim;
+namespace LLMAgentSlimGUI.Services;
 
-internal class FinishPlugin(Func<CancellationTokenSource> cancellationTokenSourceSelector)
+internal sealed class GuiFinishPlugin(Func<CancellationTokenSource> cancellationTokenSourceSelector)
 {
 	[KernelFunction("task_finished")]
 	[Description("Marks the task as finished.")]
 	public void TaskFinished(string userMessage)
 	{
-		Console.WriteLine(userMessage);
 		cancellationTokenSourceSelector().Cancel();
 	}
 }

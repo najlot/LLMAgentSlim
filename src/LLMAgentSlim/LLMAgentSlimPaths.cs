@@ -3,6 +3,7 @@ namespace LLMAgentSlim;
 internal static class LLMAgentSlimPaths
 {
 	public const string ConfigurationFileName = "llmagentslim.json";
+	public const string AppDataDirectoryName = ".llmagentslim";
 
 	public static string GetAppDataDirectory()
 	{
@@ -17,6 +18,6 @@ internal static class LLMAgentSlimPaths
 			throw new InvalidOperationException("Could not determine the application data directory.");
 		}
 
-		return Path.Combine(appDataPath, "LLMAgentSlim");
+		return Path.Combine(appDataPath, AppDataDirectoryName);
 	}
 }

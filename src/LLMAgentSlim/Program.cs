@@ -36,8 +36,9 @@ TASK_COMPLETED
 - Never invent tool results.
 - Never assume files exist.
 - Keep responses short.
-- Prefer the FileSystem, Directory, Search, Shell, Git, and DotNet plugins for workspace actions.
-- Use the Notes plugin for keeping track of information.
+ - Prefer the FileSystem, Directory, Search, Shell, Git, DotNet, and Http plugins for workspace actions.
+- Use the Memory plugin to save and recall information across steps (findings, decisions, intermediate results).
+- Use the UserInput plugin to ask the user for decisions, clarifications, or confirmations whenever you are uncertain how to proceed.
 - Use the CSharp plugin only when a more direct plugin is not available.
 
 You are running on "PROJECT_OS" in `PROJECT_DIR`.
@@ -84,17 +85,34 @@ switch (agentConfiguration.Provider.Trim().ToLowerInvariant())
 }
 
 using var httpClient = configuredHttpClient;
+using var pluginHttpClient = new HttpClient();
 var cancellationTokenSource = new CancellationTokenSource();
+var isAgentRunning = false;
+
+Console.CancelKeyPress += (_, eventArgs) =>
+{
+	if (!isAgentRunning)
+	{
+		return;
+	}
+
+	eventArgs.Cancel = true;
+	cancellationTokenSource.Cancel();
+	Console.WriteLine();
+	Console.WriteLine("Stop requested. Cancelling the current agent run...");
+};
 
 builder.Plugins.AddFromObject(new FinishPlugin(() => cancellationTokenSource));
-builder.Plugins.AddFromObject(new NotesPlugin(currentDir));
-builder.Plugins.AddFromObject(new CSharpPlugin());
+builder.Plugins.AddFromObject(new MemoryPlugin(currentDir));
 builder.Plugins.AddFromObject(new FileSystemPlugin(currentDir));
 builder.Plugins.AddFromObject(new DirectoryPlugin(currentDir));
 builder.Plugins.AddFromObject(new SearchPlugin(currentDir));
 builder.Plugins.AddFromObject(new ShellPlugin(currentDir));
 builder.Plugins.AddFromObject(new GitPlugin(currentDir));
 builder.Plugins.AddFromObject(new DotNetPlugin(currentDir));
+builder.Plugins.AddFromObject(new HttpPlugin(currentDir, pluginHttpClient));
+builder.Plugins.AddFromObject(new UserInputPlugin());
+builder.Plugins.AddFromObject(new CSharpPlugin());
 
 ChatHistory history = [];
 history.AddSystemMessage(systemPrompt);
@@ -127,6 +145,7 @@ while (true)
 {
 	try
 	{
+		isAgentRunning = true;
 		var response = await chat.GetChatMessageContentAsync(
 			history,
 			settings,
@@ -140,7 +159,12 @@ while (true)
 	}
 	catch (TaskCanceledException)
 	{
+		Console.WriteLine("Agent run stopped.");
 		cancellationTokenSource = new CancellationTokenSource();
+	}
+	finally
+	{
+		isAgentRunning = false;
 	}
 
 	Console.WriteLine("Instruction or 'exit' to quit:");

@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:LLMAgentSlimGUI.ViewModels"
+             x:Class="LLMAgentSlimGUI.Views.PreRunConversationView"
+             x:DataType="vm:PreRunConversationViewModel">
+    <Grid RowDefinitions="Auto,Auto,*" RowSpacing="8">
+        <TextBlock Text="Workspace" FontWeight="Bold" />
+        <DockPanel Grid.Row="1" LastChildFill="True">
+            <Button DockPanel.Dock="Right"
+                    Margin="8,0,0,0"
+                    Content="Select workspace"
+                    Command="{Binding PickWorkspaceCommand}"
+                    CommandParameter="{Binding $parent[Window]}" />
+            <TextBox IsReadOnly="True"
+                     Text="{Binding WorkspacePath}" />
+        </DockPanel>
+        <StackPanel Grid.Row="2" Spacing="8" Margin="0,8,0,0">
+            <TabControl>
+                <TabItem Header="Configuration">
+                    <StackPanel Spacing="8" Margin="0,8,0,0">
+                        <TextBlock Text="{Binding ConfigurationSourceLabel}"
+                                   Opacity="0.8" />
+                        <TextBox AcceptsReturn="True"
+                                 MinHeight="180"
+                                 TextWrapping="Wrap"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                 FontFamily="Consolas, Cascadia Mono, monospace"
+                                 Text="{Binding ConfigurationText}" />
+                        <Button HorizontalAlignment="Right"
+                                Content="Save configuration"
+                                Command="{Binding SaveConfigurationCommand}" />
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Plugins">
+                    <StackPanel Spacing="8" Margin="0,8,0,0">
+                        <ScrollViewer MaxHeight="260"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding AvailablePlugins}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="8" BorderBrush="{DynamicResource ThemeControlMidBrush}" BorderThickness="1" CornerRadius="4" Margin="0,0,0,6">
+                                            <StackPanel Spacing="4">
+                                                <CheckBox IsChecked="{Binding IsEnabled}">
+                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
+                                                </CheckBox>
+                                                <TextBlock Text="{Binding Description}"
+                                                           Opacity="0.8"
+                                                           TextWrapping="Wrap"
+                                                           Margin="24,0,0,0" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        <Button HorizontalAlignment="Right"
+                                Content="Save plugin selection"
+                                Command="{Binding SavePluginSelectionCommand}" />
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+            <TextBlock Text="Initial request" FontWeight="Bold" />
+            <TextBox AcceptsReturn="True"
+                     MinHeight="120"
+                     TextWrapping="Wrap"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     Text="{Binding RequestText}" />
+            <Button HorizontalAlignment="Right"
+                    Content="Run"
+                    Command="{Binding RunCommand}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

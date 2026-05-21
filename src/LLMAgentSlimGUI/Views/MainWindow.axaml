@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LLMAgentSlimGUI.ViewModels"
+        xmlns:view="using:LLMAgentSlimGUI.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="LLMAgentSlimGUI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="LLMAgentSlim">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.DataTemplates>
+        <DataTemplate x:DataType="vm:PreRunConversationViewModel">
+            <view:PreRunConversationView />
+        </DataTemplate>
+
+        <DataTemplate x:DataType="vm:ActiveConversationViewModel">
+            <view:ActiveConversationView />
+        </DataTemplate>
+    </Window.DataTemplates>
+
+    <Grid RowDefinitions="*,Auto" Margin="8,0,8,4">
+        <ContentControl Grid.Row="0" Content="{Binding CurrentContent}" />
+
+        <Border Grid.Row="1" Margin="0,12,0,0">
+            <TextBlock Text="{Binding StatusMessage}" />
+        </Border>
+    </Grid>
+
+</Window>

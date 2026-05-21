@@ -1,0 +1,84 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:LLMAgentSlimGUI.ViewModels"
+             xmlns:model="using:LLMAgentSlimGUI.Models"
+             x:Class="LLMAgentSlimGUI.Views.ActiveConversationView"
+             x:DataType="vm:ActiveConversationViewModel"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             d:DesignHeight="1000"
+             d:DesignWidth="700">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="ConversationTemplate" x:DataType="model:ConversationEntry">
+            <StackPanel Spacing="4">
+                <DockPanel LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Left"
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Text="{Binding Role}" />
+                    <TextBlock DockPanel.Dock="Right"
+                                FontSize="10"
+                                Opacity="0.65"
+                                Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}" />
+                </DockPanel>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <TextBlock Grid.Column="0"
+                                FontSize="12"
+                                LineHeight="16"
+                                TextWrapping="Wrap"
+                                Text="{Binding Message}" />
+                    <Button Grid.Column="1"
+                            VerticalAlignment="Top"
+                            Content="Copy"
+                            IsVisible="{Binding CanCopy}"
+                            Click="CopyConversationEntry_OnClick" />
+                </Grid>
+                </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="*,Auto,Auto" RowSpacing="6">
+        <Border Grid.Row="0">
+            <Grid RowDefinitions="Auto,*" RowSpacing="6">
+                <TextBlock Text="Conversation" FontWeight="Bold" />
+                <ListBox x:Name="ConversationList"
+                         Grid.Row="1"
+                         ItemsSource="{Binding Conversation}"
+                         ItemTemplate="{StaticResource ConversationTemplate}" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                IsVisible="{Binding HasPendingQuestion}">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Agent question" FontWeight="Bold" />
+                <TextBlock TextWrapping="Wrap" Text="{Binding PendingQuestion}" />
+                <TextBox AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         IsEnabled="{Binding IsAwaitingUserInput}"
+                         Text="{Binding PendingAnswer}" />
+                <Button HorizontalAlignment="Right"
+                        Content="Submit answer"
+                        Command="{Binding SubmitPendingAnswerCommand}" />
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="2" Spacing="8">
+            <TextBlock Text="Follow-up or suggestion" FontWeight="Bold" />
+            <TextBox AcceptsReturn="True"
+                     MinHeight="100"
+                     TextWrapping="Wrap"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     Text="{Binding FollowUpText}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="Stop"
+                        IsVisible="{Binding CanStopAgent}"
+                        Command="{Binding StopAgentCommand}" />
+                <Button Content="Send follow-up"
+                        Command="{Binding SendFollowUpCommand}" />
+                <Button Content="New conversation"
+                        Command="{Binding StartNewConversationCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
