@@ -1,14 +1,19 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:LLMAgentSlimGUI.ViewModels"
-        xmlns:view="using:LLMAgentSlimGUI.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+    xmlns:view="using:LLMAgentSlimGUI.Views"
+    mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
         x:Class="LLMAgentSlimGUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="LLMAgentSlim">
+    Title="LLMAgentSlim"
+    Width="1320"
+    Height="920"
+    MinWidth="1040"
+    MinHeight="760"
+    Background="{DynamicResource AppWindowBackgroundBrush}">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -24,11 +29,30 @@
         </DataTemplate>
     </Window.DataTemplates>
 
-    <Grid RowDefinitions="*,Auto" Margin="8,0,8,4">
-        <ContentControl Grid.Row="0" Content="{Binding CurrentContent}" />
+    <Grid RowDefinitions="*,Auto" RowSpacing="18">
+        <TabControl Grid.Row="0"
+                    SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+            <TabItem Header="Setup">
+                <ContentControl Content="{Binding SetupViewModel}" />
+            </TabItem>
 
-        <Border Grid.Row="1" Margin="0,12,0,0">
-            <TextBlock Text="{Binding StatusMessage}" />
+            <TabItem Header="Conversation"
+                     IsEnabled="{Binding IsConversationTabEnabled}">
+                <ContentControl Content="{Binding ConversationViewModel}" />
+            </TabItem>
+        </TabControl>
+
+        <Border Grid.Row="1" Classes="card" Padding="14,10">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <TextBlock Text="Status"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           Text="{Binding StatusMessage}"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           Opacity="0.88" />
+            </Grid>
         </Border>
     </Grid>
 

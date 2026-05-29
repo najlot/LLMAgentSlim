@@ -9,14 +9,13 @@ using System.Threading.Tasks;
 
 namespace LLMAgentSlimGUI.ViewModels;
 
-public partial class ActiveConversationViewModel : ViewModelBase, IAsyncDisposable
+public partial class ActiveConversationViewModel : ObservableObject, IAsyncDisposable
 {
 	private readonly string _workspacePath;
 	private readonly string _configurationText;
 	private readonly string[] _selectedPluginKeys;
 	private readonly Func<string, Task> _onStatusChanged;
 	private readonly Func<Task> _onNewConversationRequested;
-	private readonly IRelayCommand _stopAgentCommand;
 	private AgentRunner? _agentRunner;
 	private TaskCompletionSource<string>? _pendingUserInputSource;
 
@@ -33,7 +32,6 @@ public partial class ActiveConversationViewModel : ViewModelBase, IAsyncDisposab
 		_onStatusChanged = onStatusChanged;
 		_onNewConversationRequested = onNewConversationRequested;
 		Conversation = [];
-		_stopAgentCommand = new RelayCommand(StopAgent, () => CanStopAgent);
 	}
 
 	public ObservableCollection<ConversationEntry> Conversation { get; }
@@ -46,21 +44,22 @@ public partial class ActiveConversationViewModel : ViewModelBase, IAsyncDisposab
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SubmitPendingAnswerCommand))]
-	private string pendingAnswer = string.Empty;
+	public partial string PendingAnswer { get; set; } = string.Empty;
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SubmitPendingAnswerCommand))]
-	private bool isAwaitingUserInput;
+	public partial bool IsAwaitingUserInput { get; set; }
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SendFollowUpCommand))]
-	private string followUpText = string.Empty;
+	public partial string FollowUpText { get; set; } = string.Empty;
 
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(CanStopAgent))]
+	[NotifyCanExecuteChangedFor(nameof(StopAgentCommand))]
 	[NotifyCanExecuteChangedFor(nameof(SendFollowUpCommand))]
 	[NotifyCanExecuteChangedFor(nameof(StartNewConversationCommand))]
-	private bool isBusy;
+	public partial bool IsBusy { get; set; }
 
 	private bool _hasConversation;
 
@@ -68,8 +67,6 @@ public partial class ActiveConversationViewModel : ViewModelBase, IAsyncDisposab
 	public bool CanSendFollowUp => _hasConversation && !IsBusy && !string.IsNullOrWhiteSpace(FollowUpText);
 	public bool CanStartNewConversation => _hasConversation && !IsBusy;
 	public bool CanSubmitPendingAnswer => IsAwaitingUserInput && !string.IsNullOrWhiteSpace(PendingAnswer);
-
-	public IRelayCommand StopAgentCommand => _stopAgentCommand;
 
 	public async Task StartInitialTurnAsync(string requestText)
 	{
@@ -93,6 +90,7 @@ public partial class ActiveConversationViewModel : ViewModelBase, IAsyncDisposab
 		await _onNewConversationRequested();
 	}
 
+	[RelayCommand(CanExecute = nameof(CanStopAgent))]
 	private void StopAgent()
 	{
 		if (_agentRunner?.StopCurrentRun() != true)
@@ -135,9 +133,6 @@ public partial class ActiveConversationViewModel : ViewModelBase, IAsyncDisposab
 		await _onStatusChanged("Running agent...");
 		try
 		{
-			OnPropertyChanged(nameof(CanStopAgent));
-			StopAgentCommand.NotifyCanExecuteChanged();
-
 			Conversation.Add(new ConversationEntry(DateTimeOffset.Now, "User", text.Trim()));
 			var result = await _agentRunner!.RunTurnAsync(text.Trim(), CancellationToken.None);
 			if (!string.IsNullOrWhiteSpace(result.Message))

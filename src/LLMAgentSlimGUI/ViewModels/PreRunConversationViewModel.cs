@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace LLMAgentSlimGUI.ViewModels;
 
-public partial class PreRunConversationViewModel : ViewModelBase
+public partial class PreRunConversationViewModel : ObservableObject
 {
 	private readonly WorkspaceConfigurationService _workspaceConfigurationService = new();
 	private readonly SessionStateStore _sessionStateStore = new();
@@ -36,31 +36,31 @@ public partial class PreRunConversationViewModel : ViewModelBase
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(CanRun))]
 	[NotifyCanExecuteChangedFor(nameof(RunCommand))]
-	private string requestText = string.Empty;
+	public partial string RequestText { get; set; } = string.Empty;
 
 	[ObservableProperty]
 	[NotifyCanExecuteChangedFor(nameof(SaveConfigurationCommand))]
-	private string configurationText = string.Empty;
+	public partial string ConfigurationText { get; set; } = string.Empty;
 
 	[ObservableProperty]
-	private string workspacePath = string.Empty;
+	public partial string WorkspacePath { get; set; } = string.Empty;
 
 	[ObservableProperty]
-	private string configurationSourceLabel = "Using defaults";
+	public partial string ConfigurationSourceLabel { get; set; } = "Using defaults";
 
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(CanRun))]
 	[NotifyCanExecuteChangedFor(nameof(RunCommand))]
 	[NotifyCanExecuteChangedFor(nameof(SaveConfigurationCommand))]
 	[NotifyCanExecuteChangedFor(nameof(SavePluginSelectionCommand))]
-	private bool isWorkspaceLoaded;
+	public partial bool IsWorkspaceLoaded { get; set; }
 
 	[ObservableProperty]
 	[NotifyPropertyChangedFor(nameof(CanRun))]
 	[NotifyCanExecuteChangedFor(nameof(RunCommand))]
 	[NotifyCanExecuteChangedFor(nameof(SaveConfigurationCommand))]
 	[NotifyCanExecuteChangedFor(nameof(SavePluginSelectionCommand))]
-	private bool isBusy;
+	public partial bool IsBusy { get; set; }
 
 	public bool CanRun => IsWorkspaceLoaded && !IsBusy && !string.IsNullOrWhiteSpace(RequestText);
 

@@ -10,75 +10,179 @@
 
     <UserControl.Resources>
         <DataTemplate x:Key="ConversationTemplate" x:DataType="model:ConversationEntry">
-            <StackPanel Spacing="4">
-                <DockPanel LastChildFill="False">
-                    <TextBlock DockPanel.Dock="Left"
-                                FontSize="12"
-                                FontWeight="SemiBold"
-                                Text="{Binding Role}" />
-                    <TextBlock DockPanel.Dock="Right"
-                                FontSize="10"
-                                Opacity="0.65"
-                                Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}" />
-                </DockPanel>
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                    <TextBlock Grid.Column="0"
-                                FontSize="12"
-                                LineHeight="16"
-                                TextWrapping="Wrap"
-                                Text="{Binding Message}" />
-                    <Button Grid.Column="1"
-                            VerticalAlignment="Top"
-                            Content="Copy"
-                            IsVisible="{Binding CanCopy}"
-                            Click="CopyConversationEntry_OnClick" />
-                </Grid>
+            <Border Classes="card alt"
+                    Padding="12"
+                    CornerRadius="0"
+                    Margin="0">
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                        <Border Classes="pill" Padding="10,4">
+                            <TextBlock FontSize="11"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding Role}" />
+                        </Border>
+
+                        <TextBlock Grid.Column="2"
+                                   FontSize="11"
+                                   Opacity="0.68"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <TextBlock Grid.Column="0"
+                                   FontSize="13"
+                                   LineHeight="18"
+                                   TextWrapping="Wrap"
+                                   Text="{Binding Message}" />
+                        <Button Grid.Column="1"
+                                VerticalAlignment="Top"
+                                Content="Copy"
+                                IsVisible="{Binding CanCopy}"
+                                Click="CopyConversationEntry_OnClick" />
+                    </Grid>
                 </StackPanel>
+            </Border>
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid RowDefinitions="*,Auto,Auto" RowSpacing="6">
-        <Border Grid.Row="0">
-            <Grid RowDefinitions="Auto,*" RowSpacing="6">
-                <TextBlock Text="Conversation" FontWeight="Bold" />
+    <Grid RowDefinitions="*,Auto"
+          ColumnDefinitions="1.65*,1*"
+          ColumnSpacing="18"
+          RowSpacing="18">
+        <Border Grid.Row="0"
+                Grid.Column="0"
+                Classes="card"
+                Padding="18">
+            <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Conversation"
+                                   FontSize="20"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Activity, tool output, and assistant replies appear here in order."
+                                   Opacity="0.82"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Border Grid.Column="1"
+                            Classes="pill"
+                            Padding="10,4"
+                            VerticalAlignment="Top">
+                        <TextBlock Text="{Binding Conversation.Count, StringFormat='{}{0} entries'}"
+                                   FontSize="11"
+                                   FontWeight="SemiBold" />
+                    </Border>
+                </Grid>
+
                 <ListBox x:Name="ConversationList"
                          Grid.Row="1"
+                         BorderThickness="0"
                          ItemsSource="{Binding Conversation}"
-                         ItemTemplate="{StaticResource ConversationTemplate}" />
+                         ItemTemplate="{StaticResource ConversationTemplate}" >
+                    <ListBox.Styles>
+						<Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                        </Style>
+                    </ListBox.Styles>
+                </ListBox>
             </Grid>
         </Border>
 
-        <Border Grid.Row="1"
-                IsVisible="{Binding HasPendingQuestion}">
-            <StackPanel Spacing="8">
-                <TextBlock Text="Agent question" FontWeight="Bold" />
-                <TextBlock TextWrapping="Wrap" Text="{Binding PendingQuestion}" />
-                <TextBox AcceptsReturn="True"
-                         TextWrapping="Wrap"
-                         IsEnabled="{Binding IsAwaitingUserInput}"
-                         Text="{Binding PendingAnswer}" />
-                <Button HorizontalAlignment="Right"
-                        Content="Submit answer"
-                        Command="{Binding SubmitPendingAnswerCommand}" />
-            </StackPanel>
-        </Border>
+        <StackPanel Grid.Row="0"
+                    Grid.Column="1"
+                    Spacing="18">
+            <Border Classes="card alt" Padding="18">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Session controls"
+                                   FontSize="20"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Stop the current run, continue the thread, or reset back to setup."
+                                   Opacity="0.82"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
 
-        <StackPanel Grid.Row="2" Spacing="8">
-            <TextBlock Text="Follow-up or suggestion" FontWeight="Bold" />
-            <TextBox AcceptsReturn="True"
-                     MinHeight="100"
-                     TextWrapping="Wrap"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     Text="{Binding FollowUpText}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                <Button Content="Stop"
-                        IsVisible="{Binding CanStopAgent}"
-                        Command="{Binding StopAgentCommand}" />
-                <Button Content="Send follow-up"
-                        Command="{Binding SendFollowUpCommand}" />
-                <Button Content="New conversation"
-                        Command="{Binding StartNewConversationCommand}" />
-            </StackPanel>
+                    <StackPanel Grid.Row="1"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Spacing="10">
+                        <Button Content="Stop"
+                                IsVisible="{Binding CanStopAgent}"
+                                Command="{Binding StopAgentCommand}" />
+                        <Button Content="New conversation"
+                                Command="{Binding StartNewConversationCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Classes="card"
+                    Padding="18"
+                    IsVisible="{Binding HasPendingQuestion}">
+                <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Agent question"
+                                   FontSize="20"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding PendingQuestion}"
+                                   Opacity="0.88"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1"
+                               Text="Your answer"
+                               FontWeight="SemiBold"
+                               Opacity="0.82" />
+
+                    <TextBox Grid.Row="2"
+                             AcceptsReturn="True"
+                             MinHeight="120"
+                             TextWrapping="Wrap"
+                             IsEnabled="{Binding IsAwaitingUserInput}"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             Text="{Binding PendingAnswer}" />
+
+                    <Button Grid.Row="3"
+                            HorizontalAlignment="Right"
+                            Content="Submit answer"
+                            Command="{Binding SubmitPendingAnswerCommand}" />
+                </Grid>
+            </Border>
         </StackPanel>
+
+        <Border Grid.Row="1"
+                Grid.ColumnSpan="2"
+                Classes="card alt"
+                Padding="18">
+            <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Follow-up"
+                               FontSize="20"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text="Send the next instruction once the agent finishes or after you stop the current run."
+                               Opacity="0.82"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+
+                <TextBox Grid.Row="1"
+                         AcceptsReturn="True"
+                         MinHeight="140"
+                         TextWrapping="Wrap"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         Text="{Binding FollowUpText}" />
+
+                <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <TextBlock Text="Follow-ups stay in the current workspace and reuse the active agent session."
+                               VerticalAlignment="Center"
+                               Opacity="0.72"
+                               TextWrapping="Wrap" />
+
+                    <Button Grid.Column="1"
+                            MinWidth="160"
+                            Content="Send follow-up"
+                            Command="{Binding SendFollowUpCommand}" />
+                </Grid>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

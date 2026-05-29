@@ -1,22 +1,79 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="LLMAgentSlimGUI.App"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Dark">
+
+    <Application.Resources>
+        <SolidColorBrush x:Key="AppWindowBackgroundBrush" Color="#0A1320" />
+        <SolidColorBrush x:Key="AppPanelBrush" Color="#101927" />
+        <SolidColorBrush x:Key="AppPanelAltBrush" Color="#162338" />
+        <SolidColorBrush x:Key="AppSurfaceBrush" Color="#0B1220" />
+        <SolidColorBrush x:Key="AppBorderBrush" Color="#2D3A53" />
+        <SolidColorBrush x:Key="AppBorderSoftBrush" Color="#26344D" />
+        <SolidColorBrush x:Key="AppTextBrush" Color="#EEF4FF" />
+        <SolidColorBrush x:Key="AppMutedTextBrush" Color="#C9D5EA" />
+        <SolidColorBrush x:Key="AppAccentBrush" Color="#4A8BFF" />
+        <SolidColorBrush x:Key="AppAccentSoftBrush" Color="#21324C" />
+    </Application.Resources>
   
     <Application.Styles>
         <FluentTheme />
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
         <Style Selector="Button">
-            <Setter Property="Background" Value="#FF1E3C5A" />
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,8" />
         </Style>
         <Style Selector="Button:pointerover">
-            <Setter Property="Background" Value="#FF1E3C5A" />
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="{DynamicResource AppAccentBrush}" />
         </Style>
         <Style Selector="Button:pressed">
-            <Setter Property="Background" Value="#FF1E3C5A" />
-            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="#376BC8" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CaretBrush" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+        </Style>
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource AppTextBrush}" />
+            <Setter Property="Padding" Value="18,10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource AppPanelBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+        <Style Selector="Border.card.alt">
+            <Setter Property="Background" Value="{DynamicResource AppPanelAltBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+        <Style Selector="Border.pill">
+            <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}" />
+            <Setter Property="CornerRadius" Value="0" />
         </Style>
     </Application.Styles>
 </Application>
