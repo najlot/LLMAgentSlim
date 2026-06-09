@@ -101,6 +101,16 @@ internal sealed class WorkspaceConfigurationService
 						TopK = 10,
 						TopP = 0.5,
 						Temperature = 0.1
+					},
+					OpenAI = new
+					{
+						Endpoint = "http://localhost:8080/v1/",
+						Model = "qwen3-coder",
+						ApiKey = string.Empty,
+						OrganizationId = string.Empty,
+						TimeoutMinutes = 10,
+						TopP = 0.5,
+						Temperature = 0.1
 					}
 				}
 			}

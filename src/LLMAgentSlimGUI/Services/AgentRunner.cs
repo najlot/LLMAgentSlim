@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Ollama;
 using OllamaSharp;
 using LLMAgentSlim;
@@ -118,6 +119,30 @@ ALWAYS explore the environment and read the files needed to understand the curre
 					Temperature = agentConfiguration.Providers.Ollama.Temperature,
 					FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
 					Stop = [TaskCompletedToken]
+				};
+				break;
+			case "openai":
+				_logAction($"Using OpenAI-compatible provider. Endpoint: {agentConfiguration.Providers.OpenAI.Endpoint} Model: {agentConfiguration.Providers.OpenAI.Model}", false);
+
+				configuredHttpClient = new HttpClient
+				{
+					BaseAddress = new Uri(agentConfiguration.Providers.OpenAI.Endpoint),
+					Timeout = TimeSpan.FromMinutes(agentConfiguration.Providers.OpenAI.TimeoutMinutes)
+				};
+
+				builder.AddOpenAIChatCompletion(
+					modelId: agentConfiguration.Providers.OpenAI.Model,
+					endpoint: new Uri(agentConfiguration.Providers.OpenAI.Endpoint),
+					apiKey: NullIfWhiteSpace(agentConfiguration.Providers.OpenAI.ApiKey),
+					orgId: NullIfWhiteSpace(agentConfiguration.Providers.OpenAI.OrganizationId),
+					httpClient: configuredHttpClient);
+
+				settings = new OpenAIPromptExecutionSettings
+				{
+					TopP = agentConfiguration.Providers.OpenAI.TopP,
+					Temperature = agentConfiguration.Providers.OpenAI.Temperature,
+					FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+					StopSequences = [TaskCompletedToken]
 				};
 				break;
 			default:
@@ -286,4 +311,9 @@ ALWAYS explore the environment and read the files needed to understand the curre
 	}
 
 	private bool IsPluginEnabled(string pluginKey) => _selectedPluginKeys.Contains(pluginKey);
+
+	private static string? NullIfWhiteSpace(string? value)
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value;
+	}
 }

@@ -1,6 +1,6 @@
 # LLMAgentSlim
 
-LLMAgentSlim is a minimal Semantic Kernel coding agent that runs against an Ollama model and exposes a workspace-scoped toolset for common development tasks.
+LLMAgentSlim is a minimal Semantic Kernel coding agent that runs against an Ollama model or an OpenAI-compatible endpoint and exposes a workspace-scoped toolset for common development tasks.
 
 ## Plugins
 
@@ -36,7 +36,10 @@ dotnet run --project src/LLMAgentSlim/LLMAgentSlim.csproj -- --config /path/to/l
 - `-c` or `--config` selects an explicit configuration file. Relative config paths are resolved from the selected working directory.
 - While the console agent is running, press `Ctrl+C` to stop the current run immediately and return to the prompt without exiting the app.
 
-LLMAgentSlim reads its provider selection and provider-specific settings from `llmagentslim.json` in the current working directory. The repository includes an Ollama example:
+LLMAgentSlim reads its provider selection and provider-specific settings from `llmagentslim.json` in the current working directory. Supported providers are:
+
+- `ollama` for a local Ollama instance.
+- `openai` for OpenAI-compatible chat endpoints, including llama.cpp's server mode.
 
 Configuration lookup order:
 
@@ -67,8 +70,19 @@ Configuration lookup order:
 				"TopK": 10,
 				"TopP": 0.5,
 				"Temperature": 0.1
+			},
+			"OpenAI": {
+				"Endpoint": "http://localhost:8080/v1/",
+				"Model": "qwen3-coder",
+				"ApiKey": "",
+				"OrganizationId": "",
+				"TimeoutMinutes": 10,
+				"TopP": 0.5,
+				"Temperature": 0.1
 			}
 		}
 	}
 }
 ```
+
+For llama.cpp, set `Provider` to `openai` and point `Providers.OpenAI.Endpoint` at the server's OpenAI-compatible API base URL, typically `http://localhost:8080/v1/`. `ApiKey` and `OrganizationId` can be left empty unless your proxy requires them. A ready-to-copy example is included in [llmagentslim.llamacpp.example.json](llmagentslim.llamacpp.example.json).

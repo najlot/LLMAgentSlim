@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Ollama;
 using OllamaSharp;
 using LLMAgentSlim;
@@ -77,6 +78,33 @@ switch (agentConfiguration.Provider.Trim().ToLowerInvariant())
 			Temperature = agentConfiguration.Providers.Ollama.Temperature,
 			FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
 			Stop = ["TASK_COMPLETED"]
+		};
+
+		break;
+	case "openai":
+		Console.WriteLine("Using OpenAI-compatible provider.");
+		Console.WriteLine($"Endpoint: {agentConfiguration.Providers.OpenAI.Endpoint}");
+		Console.WriteLine($"Model: {agentConfiguration.Providers.OpenAI.Model}");
+
+		configuredHttpClient = new HttpClient
+		{
+			BaseAddress = new Uri(agentConfiguration.Providers.OpenAI.Endpoint),
+			Timeout = TimeSpan.FromMinutes(agentConfiguration.Providers.OpenAI.TimeoutMinutes)
+		};
+
+		builder.AddOpenAIChatCompletion(
+			modelId: agentConfiguration.Providers.OpenAI.Model,
+			endpoint: new Uri(agentConfiguration.Providers.OpenAI.Endpoint),
+			apiKey: NullIfWhiteSpace(agentConfiguration.Providers.OpenAI.ApiKey),
+			orgId: NullIfWhiteSpace(agentConfiguration.Providers.OpenAI.OrganizationId),
+			httpClient: configuredHttpClient);
+
+		settings = new OpenAIPromptExecutionSettings
+		{
+			TopP = agentConfiguration.Providers.OpenAI.TopP,
+			Temperature = agentConfiguration.Providers.OpenAI.Temperature,
+			FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+			StopSequences = ["TASK_COMPLETED"]
 		};
 
 		break;
@@ -242,4 +270,9 @@ static string ResolveAgainstWorkingDirectory(string path, string workingDirector
 	}
 
 	return Path.GetFullPath(Path.Combine(workingDirectory, path));
+}
+
+static string? NullIfWhiteSpace(string? value)
+{
+	return string.IsNullOrWhiteSpace(value) ? null : value;
 }

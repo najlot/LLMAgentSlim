@@ -8,7 +8,16 @@
         "TimeoutMinutes": 10,
         "TopK": 10,
         "TopP": 0.5,
-        "Temperature": 0.1
+        "Temperature": 0.0
+      },
+      "OpenAI": {
+        "Endpoint": "http://localhost:8080/v1/",
+        "Model": "your-model-name",
+        "ApiKey": "",
+        "OrganizationId": "",
+        "TimeoutMinutes": 10,
+        "TopP": 0.5,
+        "Temperature": 0.0
       }
     }
   }
